@@ -2,7 +2,7 @@
 set -xe
 
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-hwclock -systohc --utc
+hwclock --systohc --utc
 
 # locale
 sed -i 's/#zh_CN.UTF-8/zh_CN.UTF-8/g' /etc/locale.gen
@@ -11,13 +11,13 @@ locale-gen
 echo LANG=en_US.UTF-8 >> /etc/locale.conf
 
 echo curtain > /etc/hostname
-cat << EOF >> /etc/hosts
+cat << 'EOF' >> /etc/hosts
 127.0.0.1	localhost
 127.0.0.1	curtain
 EOF
 
 # archlinuxcn source
-cat << EOF >> /etc/pacman.conf
+cat << 'EOF' >> /etc/pacman.conf
 [archlinuxcn]
 Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
 EOF
@@ -31,5 +31,5 @@ grub-mkconfig -o /boot/grub/grub.cfg
 systemctl enable NetworkManager
 systemctl enable sshd
 
-echo "set root passwd"
-passwd
+echo "all things have done."
+sleep 3
