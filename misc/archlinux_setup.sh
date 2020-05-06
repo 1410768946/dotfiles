@@ -5,14 +5,14 @@ set -xe
 timedatectl set-ntp true
 
 # default assume we have GPT partition with 
-# root partition in /dev/sda1
-# efi partition in /dev/sda2
-mkfs.ext4 /dev/sda1
-mkfs.vfat /dev/sda2
-mkdir -p /mnt/boot/efi
+# efi partition in /dev/sda1
+# root partition in /dev/sda2
+mkfs.vfat /dev/sda1
+mkfs.ext4 /dev/sda2
 # mount /
-mount /dev/sda1 /mnt
-mount /dev/sda2 /mnt/boot/efi
+mount /dev/sda2 /mnt
+mkdir -p /mnt/boot/efi
+mount /dev/sda1 /mnt/boot/efi
 
 # set mirrors of china
 cat << 'EOF' > /etc/pacman.d/mirrorlist
