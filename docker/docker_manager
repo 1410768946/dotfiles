@@ -1,0 +1,61 @@
+#!/usr/bin/env sh
+
+function run() {
+	local image_id=$1
+	shift
+	local args=$*
+	#echo "image_id:$image_id, args:$args"
+	docker run $args -v /Users/curtainw/workspace:/workspace --cap-add=SYS_PTRACE $image_id || exit 0
+
+	container_id=$(docker ps | grep $image_id | awk '{print $1}')
+	#echo "container:$container_id" 
+	docker exec -it $container_id /bin/zsh
+}
+
+
+if [ "$#" -lt 1 ]
+then
+	echo "Usage: $0 [options] image(id|name)"
+	echo "options are:"
+	echo "  -d --daemon, Run container in background.(default)"
+	echo "  -f --stage, Run container in stage."
+	echo "  -r --rm, Clean container space when it's live over."
+	exit 0
+fi
+
+	
+for arg in $*
+do
+	case $arg  in
+	-d|--daemon)
+		daemon=1;;
+	-f|--stage)
+		daemon=0;;
+	-r|--rm)
+		clean=1;;
+	*)
+		image=$arg;;
+	esac
+done
+
+if [ "$daemon" -a "$clean" ]
+then
+	args="-itd --rm"
+elif [ "$daemon" ]
+then
+	args="-itd"
+elif [ "$clean" ]
+then
+	args="-it --rm"
+else
+	args="-it"
+fi
+
+iamge_id=$(docker images | grep $image | awk '{print $3}')
+if [ -z "$image_id" ]
+then
+	echo "[error] no image found, please check it."
+	exit 1
+fi
+
+run $image_id $args
