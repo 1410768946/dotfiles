@@ -23,7 +23,15 @@ Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
 EOF
 # upgrade system
 pacman -Syyu --noconfirm
-pacman -S vim git grub efibootmgr networkmanager openssh --noconfirm
+pacman -S haveged vim git grub efibootmgr networkmanager openssh --noconfirm
+systemctl start haveged
+systemctl enable haveged
+rm -rf /etc/pacman.d/gnupg
+pacman-key --init --noconfirm
+pacman-key --populate archlinux --noconfirm
+pacman-key --populate archlinuxcn --noconfirm
+# uncomment this for gui use
+#pacman -S gcc make cmake pkgconf acpi acpitool feh picom nerd-fonts-source-code-pro wqy-microhei ttf-symbola network-manager-applet xfce4-power-manager --noconfirm
 grub-install --target=x86_64-efi --efi-directory=/boot/efi
 grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -31,5 +39,6 @@ grub-mkconfig -o /boot/grub/grub.cfg
 systemctl enable NetworkManager
 systemctl enable sshd
 
+passwd
 echo "all things have done."
 sleep 3
