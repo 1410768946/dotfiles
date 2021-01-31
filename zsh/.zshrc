@@ -1,5 +1,6 @@
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
+export GOPROXY="https://goproxy.cn,direct"
 
 plugins=(git)
 ZSH_DISABLE_COMPFIX="true"
@@ -43,9 +44,6 @@ _INIT_SH_NOLOG=1
 
 # exit for non-interactive shell
 [[ $- != *i* ]] && return
-
-# WSL (aka Bash for Windows) doesn't work well with BG_NICE
-[ -d "/mnt/c" ] && [[ "$(uname -a)" == *Microsoft* ]] && unsetopt BG_NICE
 
 # Initialize command prompt
 export PS1="%n@%m:%~%# "
@@ -97,13 +95,13 @@ antigen use prezto
 
 
 # default bundles
-antigen bundle rupa/z z.sh
-antigen bundle Vifon/deer
-antigen bundle zdharma/fast-syntax-highlighting
+#antigen bundle rupa/z z.sh
+#antigen bundle Vifon/deer
+#antigen bundle zdharma/fast-syntax-highlighting
 antigen theme romkatv/powerlevel10k
 # antigen bundle zsh-users/zsh-autosuggestions
 
-antigen bundle willghatch/zsh-cdr
+#antigen bundle willghatch/zsh-cdr
 # antigen bundle zsh-users/zaw
 
 # check login shell
@@ -166,8 +164,8 @@ setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording en
 setopt HIST_VERIFY # Don't execute immediately upon history expansion.
 
 # setup for deer
-autoload -U deer
-zle -N deer
+#autoload -U deer
+#zle -N deer
 
 # default keymap
 bindkey -s '\ee' 'vim\n'
@@ -188,9 +186,9 @@ bindkey '\e[1;3C' forward-word
 bindkey '\e[1;3A' beginning-of-line
 bindkey '\e[1;3B' end-of-line
 
-bindkey '\ev' deer
-bindkey -s '\eu' 'ranger_cd\n'
-bindkey -s '\eOS' 'vim '
+#bindkey '\ev' deer
+#bindkey -s '\eu' 'ranger_cd\n'
+#bindkey -s '\eOS' 'vim '
 
 
 # source function.sh if it exists
@@ -202,9 +200,60 @@ unsetopt correct
 DISABLE_CORRECTION="true" 
 
 # completion detail
-zstyle ':completion:*:complete:-command-:*:*' ignored-patterns '*.pdf|*.exe|*.dll'
-zstyle ':completion:*:*sh:*:' tag-order files
+# zstyle ':completion:*:complete:-command-:*:*' ignored-patterns '*.pdf|*.exe|*.dll'
+# zstyle ':completion:*:*sh:*:' tag-order files
+zstyle ":completion:*:git-checkout:*" sort false
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa -1 --color=always $realpath'
+# kill 结束进程时时提供预览
+zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm,cmd -w -w"
+zstyle ':fzf-tab:complete:kill:argument-rest' fzf-preview 'ps --pid=$word -o cmd --no-headers -w -w'
+zstyle ':fzf-tab:complete:kill:argument-rest' fzf-flags '--preview-window=down:3:wrap'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-export PATH="/usr/local/opt/llvm/bin:$PATH"
+export PATH="/usr/local/opt/llvm/bin:/Users/curtainw/go/bin:$PATH"
+
+# alias for colorls
+#if [ -f "/usr/local/bin/colorls" ]; then
+#	alias ls='colorls'
+#	alias ll='colorls -lA --sd'
+#	alias lt='colorls --tree'
+#fi
+
+if [[ -f "/usr/local/bin/exa" ]]; then
+	alias ls='exa'
+	alias la='exa -a'
+	alias ll='exa -l'
+	alias lt='exa --tree'
+fi
+
+# another top tools
+if [ -f "/usr/local/bin/htop" ];then
+	alias top='htop'
+fi
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export FZF_COMPLETION_TRIGGER='\'
+
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
+}
+
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf "$@" --preview 'tree -C {} | head -200' ;;
+    export|unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
+    ssh)          fzf "$@" --preview 'dig {}' ;;
+    *)            fzf "$@" ;;
+  esac
+}
