@@ -1,0 +1,75 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Path to your oh-my-zsh installation.
+export ZSH="/Users/curtainw/.oh-my-zsh"
+
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+
+plugins=(
+  zsh-syntax-highlighting 
+  z
+  kubectl
+  vagrant
+)
+
+source $ZSH/oh-my-zsh.sh
+source <(kubectl completion zsh)
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+export GOPROXY="https://goproxy.cn,direct"
+
+# zsh profile
+# zmodload zsh/zprof
+
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk-15.0.2.jdk/Contents/Home"
+export MSF_HOME="/opt/metasploit-framework/bin"
+export LLVM_HOME="/usr/local/opt/llvm/bin"
+export GO_HOME="/Users/curtainw/go/bin"
+export PATH="$MSF_HOME:$LLVM_HOME:$GO_HOME:$JAVA_HOME/bin:$PATH"
+
+
+# alias
+alias vim='nvim'
+alias vi='nvim'
+(( $+commands[htop] )) && alias top='htop'
+(( $+commands[exa] )) && 	alias ls='exa' && alias ll='exa -l' && alias lt='exa --tree'
+# config for proxy
+alias proxy='export all_proxy=socks5://127.0.0.1:51837'
+alias unproxy='unset all_proxy'
+alias getip='curl http://cip.cc'
+alias lg='lazygit'
+
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export FZF_COMPLETION_TRIGGER='\'
+
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
+}
+
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf "$@" --preview 'exa -T -L 1 {} | head -200' ;;
+    export|unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
+    ssh)          fzf "$@" --preview 'dig {}' ;;
+    *)            fzf "$@" ;;
+  esac
+}
+
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
